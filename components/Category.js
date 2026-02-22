@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View, ActivityIndicator, Alert } from "react-native";
+import { BaseUrl } from "../assets/Data";
 
 export default function Category({route}){
 
@@ -24,7 +25,7 @@ export default function Category({route}){
   
     const fetchData = async () => {
       try {
-        const response = await fetch('https://agri-api.vercel.app/category');
+        const response = await fetch(`${BaseUrl}/category`);
         const json = await response.json();
         // console.log('json:', json);
         setUserData(json);
@@ -54,7 +55,7 @@ export default function Category({route}){
       setModalVisible(true);
       console.log('submit', inputCategory);
       const data = { email, category: inputCategory, date: formattedDate };
-      await fetch('https://agri-api.vercel.app/category', {
+      await fetch(`${BaseUrl}/category`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
