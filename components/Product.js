@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, Pressable, ScrollView, FlatList, TouchableOpacity, TextInput, Alert, StyleSheet } from "react-native";
+import { View, Text, Image, Pressable, ScrollView, FlatList, TouchableOpacity, TextInput, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import { BaseUrl } from "../assets/Data";
 import theme from "../theme/GlobalTheme";
 
@@ -27,6 +27,8 @@ export default function Product({ route }) {
     const [qty, setQty] = useState();
     const [date1, setDate1] = useState();
     const [userData, setUserData] = useState([]);
+    const [lastTap, setLastTap] = useState(0);
+    const [prodId, setProdId] = useState('');
 
 
     const fetchCategory = async () => {
@@ -51,25 +53,100 @@ export default function Product({ route }) {
         setDate1(text);
     }
 
-    const handleSubmit = async () => {
-        if (product !== '' && qty !== '' && unit !== '') {
-            const data = { email, category: catInfo, product, qty, unit, date: date1 };
-            await fetch(`${BaseUrl}/product`, {
-                method: 'POST',
+    async function updateProduct() {
+        try {
+            const res = await fetch(`${BaseUrl}/product/${prodId}`, {
+                method: "PATCH",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(data),
-            })
-                .then((response) => response.json())
-                .then((json) => console.log(json))
-                .then(() => { Alert.alert('successfully uploaded...') })
-                .catch((error) => console.error(error));
+                body: JSON.stringify({ email, category: catInfo, product, qty, unit, date: date1 }),
+            });
+
+            if (!res.ok) {
+                const err = await res.text();
+                throw new Error(err || "Failed to update product");
+            }
+
+            const data = await res.json();
+            console.log("Updated product:", data);
+            Alert.alert('product updated...');
+            if (res.ok) {
+                setProdId('');
+            }
+            return data;
+        } catch (err) {
+            console.error("Update failed:", err);
+            throw err;
+        }
+    }
+
+    const handleSubmit = async () => {
+        setModalVisible(true);
+        if (prodId === '') {
+            if (product !== '' && qty !== '' && unit !== '') {
+                const data = { email, category: catInfo, product, qty, unit, date: date1 };
+                await fetch(`${BaseUrl}/product`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then((response) => response.json())
+                    .then((json) => console.log(json))
+                    .then(() => { Alert.alert('successfully uploaded...') })
+                    .catch((error) => console.error(error));
+            }
+        } else {
+            await updateProduct();
         }
         setProduct('');
         setUnit('');
         setQty('');
+        await fetchCategory();
+        setModalVisible(false);
     }
+
+
+    const handleDelete = async () => {
+        if (deleting) return;
+
+        if (!prodId) {
+            Alert.alert("No farm selected to delete");
+            return;
+        }
+
+        setDeleting(true);
+
+        try {
+            const res = await fetch(`${BaseUrl}/product/${prodId}`, {
+                method: "DELETE"
+            });
+
+            // await res.text(); 
+            setDeleting(false);
+
+            if (!res.ok) {
+                throw new Error("Delete failed");
+            }
+
+            Alert.alert("Product deleted");
+            setDate1(formattedDate);
+            setCatInfo('');
+            setProdId('');
+            setProduct('');
+            setUnit('');
+            setQty('');
+            await fetchCategory();
+
+        } catch (err) {
+            console.error("Delete failed:", err);
+            Alert.alert("Delete failed");
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     const category = () => {
         return (
@@ -107,6 +184,20 @@ export default function Product({ route }) {
         fetchCategory();
         setDate1(formattedDate);
     }, []);
+
+    const handleDoubleClick = (data) => {
+        console.log('id:', data._id, data.qty);
+        const now = Date.now();
+        if (now - lastTap < 2000) {
+            setCatInfo(data.category);
+            setProduct(data.product);
+            setQty(data.qty);
+            setUnit(data.unit);
+            setDate1(data.date);
+            setProdId(data._id);
+        }
+        setLastTap(now);
+    };
 
     return (
         <View style={{ flexDirection: 'column', justifyContent: 'center', height: '100%', width: '100%', alignItems: 'center', backgroundColor: 'white' }}>
@@ -168,7 +259,7 @@ export default function Product({ route }) {
                             <TextInput
                                 style={{ width: '100%', backgroundColor: 'lightgrey', color: 'black', paddingLeft: '5%' }}
                                 onChangeText={handleQty}
-                                value={qty}
+                                value={qty?.toString()}
                             />
                         </View>
                     </View>
@@ -187,10 +278,17 @@ export default function Product({ route }) {
                     <Pressable onPress={() => { handleSubmit() }} style={{ paddingTop: 50 }}>
                         <Text style={{ height: 30, width: 80, borderWidth: 1, borderColor: 'black', textAlign: 'center', paddingTop: 3, borderRadius: 5, elevation: 5, backgroundColor: 'black', color: 'white', fontWeight: '400' }}>Save</Text>
                     </Pressable>
-                    <Pressable onPress={() => { handleSubmit() }} style={{ paddingTop: 50 }}>
+                    <Pressable onPress={() => { handleDelete() }} style={{ paddingTop: 50 }}>
                         <Text style={{ height: 30, width: 80, borderWidth: 1, borderColor: 'red', textAlign: 'center', paddingTop: 3, borderRadius: 5, elevation: 5, backgroundColor: 'red', color: 'white', fontWeight: '400' }}>Delete</Text>
                     </Pressable>
-                    <Pressable onPress={() => { handleSubmit() }} style={{ paddingTop: 50 }}>
+                    <Pressable onPress={() => {
+                        setDate1(formattedDate);
+                        setCatInfo('');
+                        setProdId('');
+                        setProduct('');
+                        setUnit('');
+                        setQty('');
+                    }} style={{ paddingTop: 50 }}>
                         <Text style={{ height: 30, width: 80, borderWidth: 1, borderColor: 'green', textAlign: 'center', paddingTop: 3, borderRadius: 5, elevation: 5, backgroundColor: 'green', color: 'white', fontWeight: '400' }}>New</Text>
                     </Pressable>
                 </View>

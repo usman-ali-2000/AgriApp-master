@@ -113,7 +113,7 @@ export default function Farms({ route }) {
         throw new Error("Delete failed");
       }
 
-      // Alert.alert("Farm deleted");
+      Alert.alert("Farm deleted");
       setFarmId('');
       setInputFarm('');
       await fetchData();
@@ -320,11 +320,6 @@ export default function Farms({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-  },
   container2: {
     flexDirection: 'row',
     // width: '95%',
