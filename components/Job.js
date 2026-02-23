@@ -1,77 +1,116 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, Text, TextInput, View, ActivityIndicator, Alert } from "react-native";
+import { Pressable, Text, TextInput, View, ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import theme from "../theme/GlobalTheme";
+import { BaseUrl } from "../assets/Data";
 
-export default function Job({route}){
+export default function Job({ route }) {
 
-    const email = route.params.email;
+  const email = route.params.email;
 
 
-    const currentDate = new Date();
+  const currentDate = new Date();
 
-    const day = currentDate.getDate();
-    const month = currentDate.getMonth() + 1;
-    const year = currentDate.getFullYear();
- 
-    const formattedDate = `${day}/${month}/${year}`;
- 
+  const day = currentDate.getDate();
+  const month = currentDate.getMonth() + 1;
+  const year = currentDate.getFullYear();
 
-    const focusRef = useRef(null);
+  const formattedDate = `${day}/${month}/${year}`;
 
-    const [inputJob, setInputJob] = useState('');
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [deleting, setDeleting] = useState(false);
-    const [userData, setUserData] = useState([]);
-    const [date1, setDate1] = useState('');
-  
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`https://agri-api.vercel.app/job/${email}`);
-        const json = await response.json();
-        // console.log('json:', json);
-        setUserData(json);
-      } catch (error) {
-        console.log('error in fetching');
-      }
-    };
 
-    const handleTextChange=(text)=>{
+  const focusRef = useRef(null);
+
+  const [inputJob, setInputJob] = useState('');
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [userData, setUserData] = useState([]);
+  const [date1, setDate1] = useState('');
+  const [lastTap, setLastTap] = useState(0);
+  const [jobId, setJobId] = useState('');
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(`${BaseUrl}/job`);
+      const json = await response.json();
+      // console.log('json:', json);
+      setUserData(json);
+    } catch (error) {
+      console.log('error in fetching');
+    }
+  };
+
+  const handleTextChange = (text) => {
     setInputJob(text);
-    }
+  }
 
-    const handleModal=()=>{
-        setModalVisible(false);
+  const handleModal = () => {
+    setModalVisible(false);
+  }
+
+  const handleDate = (text) => {
+    setDate1(text);
+  }
+
+  async function updateJob() {
+    try {
+      setModalVisible(true);
+      const res = await fetch(`${BaseUrl}/job/${jobId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, job: inputJob, date: date1 }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || "Failed to update job");
+      }
+
+      const data = await res.json();
+      console.log("Updated job:", data);
+      Alert.alert('job updated...');
+      if (res.ok) {
+        setJobId('');
+      }
+      return data;
+    } catch (err) {
+      console.error("Update failed:", err);
+      throw err;
+    } finally {
+      setModalVisible(false);
     }
-    
-    const handleDate =(text)=>{
-      setDate1(text);
-    }
+  }
 
   const handleSubmit = async () => {
-    const checkJob = userData.find((item) => item.job === inputJob);
+    if (jobId === '') {
+      const checkJob = userData.find((item) => item.job === inputJob);
 
-    if (inputJob !== '' && checkJob === undefined) {
-      setModalVisible(true);
-      console.log('submit', inputJob);
-      const data = { email, job: inputJob, date: date1 };
-      await fetch('https://agri-api.vercel.app/job', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((json) => console.log(json))
-        .then(() => handleModal())
-        .catch((error) => console.error(error));
-    }else{
-      Alert.alert('already exist...');
+      if (inputJob !== '' && checkJob === undefined) {
+        setModalVisible(true);
+        console.log('submit', inputJob);
+        const data = { email, job: inputJob, date: date1 };
+        await fetch(`${BaseUrl}/job`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((json) => console.log(json))
+          .then(() => handleModal())
+          .catch((error) => console.error(error));
+      } else {
+        Alert.alert('already exist...');
+      }
+    } else {
+      await updateJob();
     }
     setInputJob('');
     fetchData();
   };
 
-  
+
   const handleDelete = async () => {
     try {
       const checkJob = userData.find(
@@ -81,17 +120,13 @@ export default function Job({route}){
         setDeleting(true);
         setInputJob('');
 
-        await fetch('https://agri-api.vercel.app/job', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
+        await fetch(`${BaseUrl}/job/${jobId}`, {
+          method: 'DELETE'
         });
         setDeleting(false);
         Alert.alert('Successfully deleted');
         setInputJob('');
-    } else {
+      } else {
         Alert.alert('not found...');
         setInputJob('');
       }
@@ -100,108 +135,56 @@ export default function Job({route}){
       setDeleting(false);
       setInputJob('');
     }
-    fetchData(); 
+    fetchData();
   };
 
-  const handleAlert=()=>{
-    if(inputJob !== ''){
-  Alert.alert(
-    'Confirm Deletion',
-    'Are you sure you want to delete this?',
-    [
-      {
-        text: 'Cancel',
-        style: 'cancel',
-        onPress: async () => {
-        setInputJob('');
-        },
-      },
-      {
-        text: 'Confirm',
-        onPress: async () => {
-               await handleDelete();
-        },
-      },
-    ],
-    { cancelable: true }
-  );
-}
-}
+  const handleAlert = () => {
+    if (inputJob !== '') {
+      Alert.alert(
+        'Confirm Deletion',
+        'Are you sure you want to delete this?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: async () => {
+              setInputJob('');
+            },
+          },
+          {
+            text: 'Confirm',
+            onPress: async () => {
+              await handleDelete();
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    }
+  }
 
-    useEffect(()=>{
-        fetchData();
-        focusRef.current && focusRef.current.focus();
-        setDate1(formattedDate);
-    },[]);
+  useEffect(() => {
+    fetchData();
+    focusRef.current && focusRef.current.focus();
+    setDate1(formattedDate);
+  }, []);
+
+  const handleDoubleClick = (data) => {
+    console.log('id:', data._id);
+    const now = Date.now();
+    if (now - lastTap < 2000) {
+      setInputJob(data.job);
+      setJobId(data._id);
+      setDate1(data.date);
+    }
+    setLastTap(now);
+  };
 
 
-    return(
-        
-    <View style={{flexDirection: 'column', justifyContent: 'center', height: '100%', width: '100%',alignItems: 'center', backgroundColor:'white'}}>
-        <Text style={{ width: '30%', fontSize: 15, color:'black', marginRight:'40%' }}>Date</Text>
-        <View style={{width:'30%', height:40, backgroundColor:'lightgrey',  borderRadius:8, marginRight:'40%'}}>
-        <TextInput 
-        ref={focusRef}
-        style={{
-          width: '100%',
-          height:40,
-        }}
-        onChangeText={handleDate}
-        value={date1}
-        secureTextEntry={false}
-      />
-      </View>
-      <Text style={{ width: '70%', fontSize: 15, color:'black', marginTop:'5%' }}>Enter Job</Text>
-        <TextInput 
-        ref={focusRef}
-        style={{
-          width: '70%',
-          borderRadius:8,
-          height:40,
-          backgroundColor: 'lightgrey',
-        }}
-        placeholder="Enter Job"
-        onChangeText={handleTextChange}
-        value={inputJob}
-        secureTextEntry={false}
-      />
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '50%', paddingTop: 30 }}>
-      <Pressable onPress={handleSubmit}>
-      <Text
-            style={{
-              height: 30,
-              width: 80,
-              borderWidth: 1,
-              borderColor: 'black',
-              textAlign: 'center',
-              paddingTop: 3,
-              borderRadius: 5,
-              elevation: 5,
-              backgroundColor: 'black',
-              color: 'white',
-            }}>
-            Save
-          </Text>
-          </Pressable>
-          <Pressable onPress={handleAlert}>
-          <Text
-            style={{
-              height: 30,
-              width: 80,
-              borderWidth: 1,
-              borderColor: 'red',
-              textAlign: 'center',
-              paddingTop: 3,
-              borderRadius: 5,
-              elevation: 5,
-              backgroundColor: 'red',
-              color: 'white',
-            }}>
-            Delete
-          </Text>
-          </Pressable>
-        </View>      
-        {isModalVisible && (
+  return (
+
+    <View style={{ flexDirection: 'column', justifyContent: 'center', height: '100%', width: '100%', alignItems: 'center', backgroundColor: 'white' }}>
+      {isModalVisible && (
         <View style={{ alignItems: 'center', marginTop: 20 }}>
           <ActivityIndicator size="large" color="#0000ff" />
           <Text>Uploading...</Text>
@@ -213,6 +196,148 @@ export default function Job({route}){
           <Text>deleting...</Text>
         </View>
       )}
+      <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center' }}>
+        <Text style={{ width: '30%', fontSize: 15, color: 'black', marginRight: '40%' }}>Date</Text>
+        <View style={{ width: '30%', height: 40, backgroundColor: 'lightgrey', borderRadius: 8, marginRight: '40%' }}>
+          <TextInput
+            ref={focusRef}
+            style={{
+              width: '100%',
+              height: 40,
+            }}
+            onChangeText={handleDate}
+            value={date1}
+            secureTextEntry={false}
+          />
         </View>
-    )
+        <Text style={{ width: '70%', fontSize: 15, color: 'black', marginTop: '5%' }}>Enter Job</Text>
+        <TextInput
+          ref={focusRef}
+          style={{
+            width: '70%',
+            borderRadius: 8,
+            height: 40,
+            backgroundColor: 'lightgrey',
+          }}
+          placeholder="Enter Job"
+          onChangeText={handleTextChange}
+          value={inputJob}
+          secureTextEntry={false}
+        />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '70%', paddingTop: 30 }}>
+          <Pressable onPress={handleSubmit}>
+            <Text
+              style={{
+                height: 30,
+                width: 80,
+                borderWidth: 1,
+                borderColor: 'black',
+                textAlign: 'center',
+                paddingTop: 3,
+                borderRadius: 5,
+                elevation: 5,
+                backgroundColor: 'black',
+                color: 'white',
+              }}>
+              Save
+            </Text>
+          </Pressable>
+          <Pressable onPress={handleAlert}>
+            <Text
+              style={{
+                height: 30,
+                width: 80,
+                borderWidth: 1,
+                borderColor: 'red',
+                textAlign: 'center',
+                paddingTop: 3,
+                borderRadius: 5,
+                elevation: 5,
+                backgroundColor: 'red',
+                color: 'white',
+              }}>
+              Delete
+            </Text>
+          </Pressable>
+          <Pressable onPress={() => {
+            setDate1(formattedDate);
+            setJobId('');
+            setInputJob('');
+          }}>
+            <Text
+              style={{
+                height: 30,
+                width: 80,
+                borderWidth: 1,
+                borderColor: 'green',
+                textAlign: 'center',
+                paddingTop: 3,
+                borderRadius: 5,
+                elevation: 5,
+                backgroundColor: 'green',
+                color: 'white',
+              }}>
+              New
+            </Text>
+          </Pressable>
+        </View>
+        <View style={styles.container2}>
+          <View style={{ alignItems: 'center' }}>
+            <View style={styles.column1}>
+              <Text style={styles.heading}>Date</Text>
+              <Text style={styles.heading}>Job</Text>
+            </View>
+            {userData.map((item) => (
+              <TouchableOpacity onPress={() => { handleDoubleClick(item) }} style={styles.column2} key={item._id}>
+                <Text style={styles.text}>{item.date}</Text>
+                <Text style={styles.text}>{item.job}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  )
 }
+
+
+const styles = StyleSheet.create({
+  container2: {
+    flexDirection: 'row',
+    // width: '95%',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginTop: '5%',
+    marginLeft: '2.5%',
+    backgroundColor: 'white',
+    marginBottom: '1%',
+    elevation: 5,
+  },
+  column1: {
+    flexDirection: 'row',
+    padding: '1%',
+    backgroundColor: theme.colors.blue,
+  },
+  column2: {
+    flexDirection: 'row',
+    // padding: '1%',
+    backgroundColor: theme.colors.white,
+  },
+  heading: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.colors.white,
+    padding: 5,
+    width: 100,
+    textAlign: 'center'
+  },
+  text: {
+    fontSize: 16,
+    color: 'black',
+    fontWeight: '400',
+    width: 100,
+    padding: 5,
+    borderWidth: 1 / 2,
+    textAlign: 'center'
+  },
+});

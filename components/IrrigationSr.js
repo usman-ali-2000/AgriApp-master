@@ -111,6 +111,7 @@ export default function IrrigationSr({ route }) {
         Alert.alert('Select Source first');
         return;
       }
+      
       setDeleting(true);
       setName('');
 
