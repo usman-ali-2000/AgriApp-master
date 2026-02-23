@@ -162,8 +162,8 @@ export default function DailyEntry({ route, navigation }) {
         // console.log('farm:', userData);
     }
 
-    const fetchPlot = async () => {
-        const response = await fetch(`${BaseUrl}/plot`);
+    const fetchPlot = async (farmId) => {
+        const response = await fetch(`${BaseUrl}/plot-farm/${farmId}`);
         const json = await response.json();
         setPlotData(json);
         // console.log('farm:', userData);
@@ -279,8 +279,8 @@ export default function DailyEntry({ route, navigation }) {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => {
                         return (
-                            <TouchableOpacity onPress={() => {
-                                setFarm(item._id); setOpenFarm(false); setFarmName(item.farm);
+                            <TouchableOpacity onPress={async () => {
+                                setFarm(item?._id); setOpenFarm(false); setFarmName(item?.farm); await fetchPlot(item?._id);
                                 // if(plot !=='' && block !== ''){
                                 //     fetchPlotNo();
                                 // }
@@ -560,7 +560,7 @@ export default function DailyEntry({ route, navigation }) {
 
     useEffect(() => {
         fetchFarm();
-        fetchPlot();
+        // fetchPlot();
         fetchVehicle();
         fetchDailyEntry();
         setDate1(formattedDate);
