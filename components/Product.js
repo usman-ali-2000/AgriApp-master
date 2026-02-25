@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, Pressable, ScrollView, FlatList, TouchableOpacity, TextInput, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import { BaseUrl } from "../assets/Data";
 import theme from "../theme/GlobalTheme";
+import DateItem from "../items/DateItem";
 
 export default function Product({ route }) {
 
@@ -84,7 +85,7 @@ export default function Product({ route }) {
     const handleSubmit = async () => {
         setModalVisible(true);
         if (prodId === '') {
-            if (product !== '' && qty !== '' && unit !== '') {
+            if (product !== '' && unit !== '') {
                 const data = { email, category: catInfo, product, qty, unit, date: date1 };
                 await fetch(`${BaseUrl}/product`, {
                     method: 'POST',
@@ -191,7 +192,7 @@ export default function Product({ route }) {
         if (now - lastTap < 2000) {
             setCatInfo(data.category);
             setProduct(data.product);
-            setQty(data.qty);
+            // setQty(data.qty);
             setUnit(data.unit);
             setDate1(data.date);
             setProdId(data._id);
@@ -227,7 +228,14 @@ export default function Product({ route }) {
                         </Pressable>
                         {openCategory ? <View style={{ height: 80, paddingLeft: '5%' }}>{category()}</View> : ''}
                     </View>
-                    <View style={{ flexDirection: 'column', width: '45%' }}>
+                    <View style={{ alignSelf: 'flex-start', marginLeft: '2%', width: '45%' }}>
+                        <DateItem
+                            label="Entry Date"
+                            value={[date1]}
+                            onChange={setDate1}
+                        />
+                    </View>
+                    {/* <View style={{ flexDirection: 'column', width: '45%' }}>
                         <Text style={{ fontWeight: 'bold', color: 'black' }}>Date</Text>
                         <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', height: 40, borderRadius: 8, paddingLeft: '5%' }}>
                             <TextInput
@@ -240,7 +248,7 @@ export default function Product({ route }) {
                                 value={date1}
                             />
                         </View>
-                    </View>
+                    </View> */}
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: 50 }}>
                     <View style={{ flexDirection: 'column', width: '40%' }}>
@@ -253,7 +261,7 @@ export default function Product({ route }) {
                             />
                         </View>
                     </View>
-                    <View style={{ flexDirection: 'column', width: '15%', paddingLeft: 5 }}>
+                    {/* <View style={{ flexDirection: 'column', width: '15%', paddingLeft: 5 }}>
                         <Text style={{ fontWeight: 'bold', color: 'black' }}>Qty</Text>
                         <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey' }}>
                             <TextInput
@@ -262,7 +270,7 @@ export default function Product({ route }) {
                                 value={qty?.toString()}
                             />
                         </View>
-                    </View>
+                    </View> */}
                     <View style={{ flexDirection: 'column', width: '15%', paddingLeft: 5 }}>
                         <Text style={{ fontWeight: 'bold', color: 'black' }}>Unit</Text>
                         <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', borderTopRightRadius: 8, borderBottomRightRadius: 8 }}>
@@ -287,7 +295,7 @@ export default function Product({ route }) {
                         setProdId('');
                         setProduct('');
                         setUnit('');
-                        setQty('');
+                        // setQty('');
                     }} style={{ paddingTop: 50 }}>
                         <Text style={{ height: 30, width: 80, borderWidth: 1, borderColor: 'green', textAlign: 'center', paddingTop: 3, borderRadius: 5, elevation: 5, backgroundColor: 'green', color: 'white', fontWeight: '400' }}>New</Text>
                     </Pressable>
@@ -299,7 +307,7 @@ export default function Product({ route }) {
                                 <Text style={styles.heading}>Date</Text>
                                 <Text style={styles.heading}>Category</Text>
                                 <Text style={styles.heading}>Product</Text>
-                                <Text style={styles.heading}>Qty</Text>
+                                {/* <Text style={styles.heading}>Qty</Text> */}
                                 <Text style={styles.heading}>Unit</Text>
                             </View>
                             {userData.map((item) => (
@@ -307,7 +315,7 @@ export default function Product({ route }) {
                                     <Text style={styles.text}>{item.date}</Text>
                                     <Text style={styles.text}>{item.category}</Text>
                                     <Text style={styles.text}>{item.product}</Text>
-                                    <Text style={styles.text}>{item.qty}</Text>
+                                    {/* <Text style={styles.text}>{item.qty}</Text> */}
                                     <Text style={styles.text}>{item.unit}</Text>
                                 </TouchableOpacity>
                             ))}

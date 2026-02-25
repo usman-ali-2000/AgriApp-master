@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View, ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { BaseUrl } from "../assets/Data";
 import theme from "../theme/GlobalTheme";
+import DateItem from "../items/DateItem";
 
 export default function Category({ route }) {
 
@@ -198,7 +199,14 @@ export default function Category({ route }) {
         </View>
       )}
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center' }}>
-        <Text style={{ width: '50%', fontSize: 15, color: 'black', marginRight: '20%' }}>Date</Text>
+        <View style={{ alignSelf: 'flex-start', marginLeft: '2%', width: '45%', marginLeft:'15%' }}>
+          <DateItem
+            label="Entry Date"
+            value={[date1]}
+            onChange={setDate1}
+          />
+        </View>
+        {/* <Text style={{ width: '50%', fontSize: 15, color: 'black', marginRight: '20%' }}>Date</Text>
         <View style={{ width: '50%', marginRight: '20%' }}>
           <TextInput
             ref={focusRef}
@@ -214,7 +222,7 @@ export default function Category({ route }) {
             value={date1}
             secureTextEntry={false}
           />
-        </View>
+        </View> */}
         <Text style={{ width: '70%', fontSize: 15, color: 'black' }}>Enter Category</Text>
         <TextInput
           ref={focusRef}

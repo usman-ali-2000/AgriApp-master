@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Pressable, Alert, ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { BaseUrl } from "../assets/Data";
 import theme from "../theme/GlobalTheme";
+import DateItem from "../items/DateItem";
 
 export default function IrrigationSr({ route }) {
 
@@ -111,7 +112,7 @@ export default function IrrigationSr({ route }) {
         Alert.alert('Select Source first');
         return;
       }
-      
+
       setDeleting(true);
       setName('');
 
@@ -212,7 +213,14 @@ export default function IrrigationSr({ route }) {
               />
             </View>
           </View> */}
-          <View style={{ flexDirection: 'column', width: '100%', marginLeft: '0%' }}>
+          <View style={{ alignSelf: 'flex-start', marginLeft: '5%', width: '70%' }}>
+            <DateItem
+              label="Entry Date"
+              value={[date1]}
+              onChange={setDate1}
+            />
+          </View>
+          {/* <View style={{ flexDirection: 'column', width: '100%', marginLeft: '0%' }}>
             <Text style={{ fontWeight: 'bold', color: 'black' }}>Date</Text>
             <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', width: '70%', height: 40, borderRadius: 8 }}>
               <TextInput
@@ -223,9 +231,9 @@ export default function IrrigationSr({ route }) {
                 }}
               />
             </View>
-          </View>
+          </View> */}
         </View>
-        <View style={{ flexDirection: 'column', width: '70%', paddingTop: 20 }}>
+        <View style={{ flexDirection: 'column', width: '70%', paddingTop: 20, marginLeft:'10%' }}>
           <Text style={{ fontWeight: 'bold', color: 'black' }}>Irrigation Source</Text>
           <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', height: 45, borderRadius: 8 }}>
             <TextInput

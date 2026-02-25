@@ -25,39 +25,39 @@ export default function Menu({ route }) {
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { navigation.navigate('Plot', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
+                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
+                        <Text style={{ color: 'black' }}>New Plot</Text>
+                        <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
+                    </View>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { navigation.navigate('Variety', { email: email }) }} style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center',height: 40, padding: '2%' }}>
                         <Text style={{ color: 'black' }}>New Variety</Text>
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { navigation.navigate('Product', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center',height: 40, padding: '2%' }}>
-                        <Text style={{ color: 'black' }}>Product</Text>
+                      <TouchableOpacity onPress={() => { navigation.navigate('Job', { email: email }) }} style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
+                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
+                        <Text style={{ color: 'black' }}>New Job</Text>
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { navigation.navigate('Category', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
+                     <TouchableOpacity onPress={() => { navigation.navigate('Category', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
                         <Text style={{ color: 'black' }}>New Category</Text>
+                        <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
+                    </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { navigation.navigate('Product', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
+                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center',height: 40, padding: '2%' }}>
+                        <Text style={{ color: 'black' }}>New Product</Text>
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { navigation.navigate('IrrigationSr', { email: email }) }} style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
                         <Text style={{ color: 'black' }}>Irrigation Source</Text>
-                        <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => { navigation.navigate('Job', { email: email }) }} style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
-                        <Text style={{ color: 'black' }}>New Job</Text>
-                        <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => { navigation.navigate('Plot', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
-                        <Text style={{ color: 'black' }}>New Plot</Text>
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>

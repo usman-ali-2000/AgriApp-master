@@ -5,7 +5,7 @@ export default function Inputform(props){
 
     return(
         <View style={{flexDirection:'column', width:'100%', paddingRight:5, paddingTop:5}}>
-        <Text style={{fontWeight:'bold', color:'black', textAlign:'center', verticalAlign:'middle'}}>{props.heading}</Text>
+        <Text style={{fontWeight:'bold', color:'black', textAlign:'left', verticalAlign:'middle'}}>{props.heading}</Text>
         <Pressable onPress={props.onPress}>
         <View style={{flexDirection:'row', backgroundColor:'lightgrey', height:40, borderRadius:8}}>
         <Text

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, FlatList, TouchableOpacity, Alert, Pressable, A
 import Inputform from "../items/Inputform";
 import Inputform2 from "../items/Inputform2";
 import { BaseUrl } from "../assets/Data";
+import DateItem from "../items/DateItem";
 
 export default function DailyEntry({ route, navigation }) {
 
@@ -140,16 +141,20 @@ export default function DailyEntry({ route, navigation }) {
 
     const fetchDailyEntry = async () => {
         try {
-            const response = await fetch(`${BaseUrl}/dailyentry`);
+            setLoading(true);
+            const response = await fetch(`${BaseUrl}/counter`);
             const json = await response.json();
-            setDailyentry(json);
-            // console.log('json imp:', json);
-            const lng = json[json.length - 1];
-            let newLng = lng.id;
-            setLength(newLng + 1);
+            // setDailyentry(json);
+            console.log('json imp:', json[0].seq);
+            // const lng = json[json.length - 1];
+            // let newLng = lng.id;
+            const formattedId = `${year}-${String(json[0].seq + 1).padStart(4, '0')}`;
+            setLength(formattedId);
             // setBaseLng(newLng+1);
         } catch (e) {
             console.log('error...', e);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -223,7 +228,7 @@ export default function DailyEntry({ route, navigation }) {
     const handleSubmit = async () => {
         if (farm && plot && area && stage) {
             setLoading(true);
-            const data = { id: length, farm: farm, plot: block + plot, area: area, stage: stage, type: subStage, deal: contract ? 'contract' : 'self', time: duration ? (durationPeriod) : (start + ' to ' + end), mean: contract ? (null) : (manpower ? 'Man Power' : 'tractor'), fuel: contract ? (null) : (manpower ? null : diesel), person: contract ? (null) : (manpower ? persons : null), quantity: qty, moga: moga, units: unit, email: email, date: date1 };
+            const data = { id: length, farm: farm, plot: block + plot, area: area, stage: stage, type: subStage, deal: contract ? 'contract' : 'self', time: duration ? (durationPeriod) : (start + ' to ' + end), mean: contract ? (null) : (manpower || stage === "sowing" ? 'Man Power' : 'tractor'), fuel: contract ? (null) : (manpower ? null : diesel), person: contract ? (null) : (manpower || self ? persons : null), quantity: qty, moga: moga, units: unit, email: email, date: date1 };
             const response = await fetch(`${BaseUrl}/dailyentry`, {
                 method: 'POST',
                 headers: {
@@ -280,7 +285,12 @@ export default function DailyEntry({ route, navigation }) {
                     renderItem={({ item }) => {
                         return (
                             <TouchableOpacity onPress={async () => {
-                                setFarm(item?._id); setOpenFarm(false); setFarmName(item?.farm); await fetchPlot(item?._id);
+                                setFarm(item?._id);
+                                setOpenFarm(false); setFarmName(item?.farm);
+                                await fetchPlot(item?._id);
+                                setPlot(null);
+                                setBlock(null);
+                                setArea();
                                 // if(plot !=='' && block !== ''){
                                 //     fetchPlotNo();
                                 // }
@@ -308,6 +318,7 @@ export default function DailyEntry({ route, navigation }) {
                             <TouchableOpacity onPress={async () => {
                                 setBlock(item.block);
                                 setPlot(item.plot);
+                                setArea(item.area);
                                 setOpenPlot(false);
                             }
                             }>
@@ -568,7 +579,7 @@ export default function DailyEntry({ route, navigation }) {
     }, [length]);
 
     return (
-        <ScrollView contentContainerStyle={{ width: '100%', flex: 1, backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ width: '100%', flex: 1, backgroundColor: 'white', justifyContent: 'flex-start', alignItems: 'center' }} showsVerticalScrollIndicator={false}>
             <View style={{
                 height: '100%',
                 width: '100%',
@@ -577,22 +588,29 @@ export default function DailyEntry({ route, navigation }) {
                 backgroundColor: 'white'
             }}>
                 <View style={{
-                    width: '100%',
+                    width: '87%',
                     flexDirection: 'row',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginLeft: '10%'
+                    marginLeft: '0%',
+                    // borderWidth:1
                 }}>
                     <View style={{
-                        width: '30%'
+                        width: '45%'
                     }}>
-                        <Inputform2 heading="Code" value={length.toString()} onChange={handleLength} />
+                        <Inputform2 heading="Code" value={length.toString()} />
                     </View>
                     <View style={{
-                        width: '60%',
+                        width: '55%',
                         paddingLeft: '15%'
                     }}>
-                        <Inputform2 heading="Date" value={date1} onChange={handleDate} />
+                        <DateItem
+                            label="Entry Date"
+                            value={[date1]}
+                            onChange={setDate1}
+                        />
+                        {/* <Text>Selected date: {date1}</Text> */}
+                        {/* <Inputform2 heading="Date" value={date1} onChange={handleDate} /> */}
                     </View>
                 </View>
                 <View style={{
@@ -621,7 +639,7 @@ export default function DailyEntry({ route, navigation }) {
                     <View style={{
                         width: '45%'
                     }}>
-                        <Inputform2 heading="Area" value={area} onChange={handleArea} />
+                        <Inputform2 heading="Area" value={area} />
                     </View>
                     <View style={{
                         width: '45%'
@@ -918,7 +936,7 @@ export default function DailyEntry({ route, navigation }) {
                             </View>
                         </View>
                     </View>
-                    {manpower && <View style={{
+                    {manpower && self && <View style={{
                         width: '40%',
                     }}>
                         <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
@@ -1253,11 +1271,11 @@ export default function DailyEntry({ route, navigation }) {
                                 </View>}
                         </View>
                     </View>
-                    <View style={{
+                    {self && <View style={{
                         width: '40%'
                     }}>
                         <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
-                    </View>
+                    </View>}
                 </View>
                 }
                 {stage === 'irrigation' && <View style={{
@@ -1488,7 +1506,7 @@ export default function DailyEntry({ route, navigation }) {
                                 </Pressable>
                             </View>
                         </View>
-                        {manpower && <View style={{
+                        {manpower && self && <View style={{
                             width: '40%'
                         }}>
                             <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
@@ -1647,18 +1665,18 @@ export default function DailyEntry({ route, navigation }) {
                 {loading && (
                     <View style={{ alignItems: 'center', marginTop: 20 }}>
                         <ActivityIndicator size="large" color="#0000ff" />
-                        <Text>Uploading...</Text>
+                        {/* <Text>Uploading...</Text> */}
                     </View>)}
                 {deleting && (
                     <View style={{ alignItems: 'center', marginTop: 20 }}>
                         <ActivityIndicator size="large" color="#0000ff" />
-                        <Text>deleting...</Text>
+                        {/* <Text>deleting...</Text> */}
                     </View>
                 )}
                 {updating && (
                     <View style={{ alignItems: 'center', marginTop: 20 }}>
                         <ActivityIndicator size="large" color="#0000ff" />
-                        <Text>deleting...</Text>
+                        {/* <Text>deleting...</Text> */}
                     </View>
                 )}
 

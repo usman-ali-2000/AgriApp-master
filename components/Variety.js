@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View, ActivityIndicator, Alert, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { BaseUrl } from "../assets/Data";
 import theme from "../theme/GlobalTheme";
+import DateItem from "../items/DateItem";
 
 export default function Variety({ route }) {
 
@@ -203,7 +204,14 @@ export default function Variety({ route }) {
         </View>
       )}
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center' }}>
-        <Text style={{ width: '50%', fontSize: 15, paddingLeft: 10, marginRight: '20%', color: 'black' }}>Date</Text>
+        <View style={{ alignSelf: 'flex-start', marginLeft: '15%', width: '45%' }}>
+          <DateItem
+            label="Entry Date"
+            value={[date1]}
+            onChange={setDate1}
+          />
+        </View>
+        {/* <Text style={{ width: '50%', fontSize: 15, paddingLeft: 10, marginRight: '20%', color: 'black' }}>Date</Text>
         <View style={{ width: '50%', marginRight: '20%' }}>
           <TextInput
             ref={focusRef}
@@ -219,7 +227,7 @@ export default function Variety({ route }) {
             value={date1}
             secureTextEntry={false}
           />
-        </View>
+        </View> */}
         <Text style={{ width: '70%', fontSize: 15, paddingLeft: 10, color: 'black' }}>Enter Variety</Text>
         <TextInput
           ref={focusRef}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View, ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import theme from "../theme/GlobalTheme";
 import { BaseUrl } from "../assets/Data";
+import DateItem from "../items/DateItem";
 
 export default function Job({ route }) {
 
@@ -197,7 +198,14 @@ export default function Job({ route }) {
         </View>
       )}
       <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center' }}>
-        <Text style={{ width: '30%', fontSize: 15, color: 'black', marginRight: '40%' }}>Date</Text>
+        <View style={{ alignSelf: 'flex-start', marginLeft: '2%', width: '45%', marginLeft:'15%' }}>
+          <DateItem
+            label="Entry Date"
+            value={[date1]}
+            onChange={setDate1}
+          />
+        </View>
+        {/* <Text style={{ width: '30%', fontSize: 15, color: 'black', marginRight: '40%' }}>Date</Text>
         <View style={{ width: '30%', height: 40, backgroundColor: 'lightgrey', borderRadius: 8, marginRight: '40%' }}>
           <TextInput
             ref={focusRef}
@@ -209,7 +217,7 @@ export default function Job({ route }) {
             value={date1}
             secureTextEntry={false}
           />
-        </View>
+        </View> */}
         <Text style={{ width: '70%', fontSize: 15, color: 'black', marginTop: '5%' }}>Enter Job</Text>
         <TextInput
           ref={focusRef}

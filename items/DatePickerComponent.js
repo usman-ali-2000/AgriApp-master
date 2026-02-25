@@ -14,9 +14,8 @@ export default function DatePickerCalendar({
         <View>
             {showCal && <Calendar
                 style={{
-                    borderWidth: 1,
                     borderColor: 'gray',
-                    height: 350
+                    // height: 350
                 }}
                 onDayPress={day => {
                     onSelectDate(day.dateString);

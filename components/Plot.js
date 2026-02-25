@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { BaseUrl } from "../assets/Data";
 import theme from "../theme/GlobalTheme";
+import DateItem from "../items/DateItem";
 
 export default function Plot({ route }) {
 
@@ -411,22 +412,30 @@ export default function Plot({ route }) {
             )}
             <ScrollView style={{ width: '100%', flex: 1, backgroundColor: 'white' }} contentContainerStyle={{ justifyContent: 'center', alignItems: 'flex-start' }} showsVerticalScrollIndicator={false}>
                 <View style={{ flexDirection: 'column', justifyContent: 'center', width: '100%', alignItems: 'center', backgroundColor: 'white' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: 10 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, width:'80%' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '40%' }}>
-                            <View style={{ flexDirection: 'column', width: '100%', paddingRight: 5, paddingTop: 5 }}>
+                            <View style={{ flexDirection: 'column', width: '120%', paddingRight: 5, paddingTop: 5, marginLeft:'15%' }}>
                                 <Text style={{ fontWeight: 'bold', color: 'black' }}>Farm</Text>
                                 <Pressable onPress={() => handleFarm()}>
                                     <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', height: 40, borderRadius: 8 }}>
                                         <Text
                                             style={{ width: '80%', alignItems: 'center', verticalAlign: 'middle', color: 'black', paddingLeft: '5%' }}
                                         >{farmData ? farmData : ''}</Text>
+
                                         <Image source={require('../assets/down.png')} style={{ height: 15, width: 15, alignSelf: 'center', marginTop: 10, marginLeft: 5, borderWidth: openFarm ? 1 : 0, padding: 5 }} />
                                     </View>
                                 </Pressable>
                                 {openFarm ? <View style={{ height: 80 }}>{farm()}</View> : ''}
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'column', width: '38%', marginLeft: '2%' }}>
+                        <View style={{ alignSelf: 'flex-start', marginLeft: '2%', width:'45%' }}>
+                            <DateItem
+                                label="Entry Date"
+                                value={[date1]}
+                                onChange={setDate1}
+                            />
+                        </View>
+                        {/* <View style={{ flexDirection: 'column', width: '38%', marginLeft: '2%' }}>
                             <Text style={{ fontWeight: 'bold', color: 'black' }}>Date</Text>
                             <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', height: 40, borderRadius: 8 }}>
                                 <TextInput
@@ -437,7 +446,7 @@ export default function Plot({ route }) {
                                     value={date1}
                                 />
                             </View>
-                        </View>
+                        </View> */}
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: 10 }}>
                         <View style={{ flexDirection: 'column', width: '40%' }}>
