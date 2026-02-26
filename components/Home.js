@@ -29,6 +29,7 @@ export default function Home({ navigation, route }) {
                 </View>
                 <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'center', height: '35%', alignItems: 'center' }}>
                     <HomeItem text="Reports" image={require('../assets/bar-chart.png')} onPress={() => navigation.navigate('Reports', { email: email })} />
+                    <HomeItem text="Inventory" image={require('../assets/inventory.png')} onPress={() => navigation.navigate('Inventory', { email: email })} />
                 </View>
             </View> 
         </View>

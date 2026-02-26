@@ -49,6 +49,12 @@ export default function Menu({ route }) {
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => { navigation.navigate('Supplier', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
+                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center',height: 40, padding: '2%' }}>
+                        <Text style={{ color: 'black' }}>New Supplier</Text>
+                        <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
+                    </View>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { navigation.navigate('Product', { email: email }) }}  style={{elevation:5, backgroundColor:theme.colors.white, width:'90%', borderRadius:8, marginTop:'5%'}}>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center',height: 40, padding: '2%' }}>
                         <Text style={{ color: 'black' }}>New Product</Text>

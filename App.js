@@ -22,6 +22,8 @@ import Splash from './components/Splash';
 import UpdateDailyEntry from './components/UpdateDailyEntry';
 import FarmReport from './components/FarmReport';
 import Reports from './components/Reports';
+import Supplier from './components/Supplier';
+import Inventory from './components/Inventory';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +57,8 @@ const hello = () => {
           <Stack.Screen name="Search"  component={Search}/>
           <Stack.Screen name="FarmReport"  component={FarmReport}/>
           <Stack.Screen name="Reports"  component={Reports}/>
+          <Stack.Screen name="Supplier"  component={Supplier}/>
+          <Stack.Screen name="Inventory"  component={Inventory}/>
     </Stack.Navigator>
     </NavigationContainer>
   )
