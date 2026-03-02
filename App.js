@@ -24,6 +24,7 @@ import FarmReport from './components/FarmReport';
 import Reports from './components/Reports';
 import Supplier from './components/Supplier';
 import Inventory from './components/Inventory';
+import Receives from './components/Receive';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +60,7 @@ const hello = () => {
           <Stack.Screen name="Reports"  component={Reports}/>
           <Stack.Screen name="Supplier"  component={Supplier}/>
           <Stack.Screen name="Inventory"  component={Inventory}/>
+          <Stack.Screen name="Receives"  component={Receives}/>
     </Stack.Navigator>
     </NavigationContainer>
   )

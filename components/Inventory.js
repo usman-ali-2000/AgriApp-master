@@ -19,7 +19,7 @@ export default function Inventory({ route }) {
     const CreateOption = () => {
         return (
             <View style={{ width: '100%', flexDirection: 'column', borderColor: 'grey', backgroundColor: 'white', alignItems: 'center' }}>
-                <TouchableOpacity onPress={() => { navigation.navigate('Farms', { email: email }) }} style={{ elevation: 5, backgroundColor: theme.colors.white, width: '90%', borderRadius: 8, marginTop: '5%' }}>
+                <TouchableOpacity onPress={() => { navigation.navigate('Receives', { email: email }) }} style={{ elevation: 5, backgroundColor: theme.colors.white, width: '90%', borderRadius: 8, marginTop: '5%' }}>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
                         <Text style={{ color: 'black' }}>Receive</Text>
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
