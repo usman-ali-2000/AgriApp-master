@@ -25,43 +25,45 @@ import Reports from './components/Reports';
 import Supplier from './components/Supplier';
 import Inventory from './components/Inventory';
 import Receives from './components/Receive';
+import InventoryReport from './components/InventoryReport';
 
 const Stack = createNativeStackNavigator();
 
 const hello = () => {
-  return(
+  return (
     <NavigationContainer>
-    <Stack.Navigator
-    screenOptions={{
-      headerStyle:{
-        backgroundColor:theme.colors.blue,
-      },
-      headerTintColor:theme.colors.white,
-    }}
-    initialRouteName='Splash'>
-      <Stack.Screen name="Splash" component={Splash} options={{headerShown:false}}/>
-      <Stack.Screen name="Login" component={Login}/>
-      <Stack.Screen name="Home" component={Home}/>
-        <Stack.Screen name="Menu" component={Menu}/>
-          <Stack.Screen name="Farms" component={Farms}/>
-          <Stack.Screen name="Plot" component={Plot}/>
-          <Stack.Screen name="Variety" component={Variety}/>
-          <Stack.Screen name="Product" component={Product}/>
-          <Stack.Screen name="Category" component={Category}/>
-          <Stack.Screen name="Implements" component={Implements} />
-          <Stack.Screen name="IrrigationSr" component={IrrigationSr} options={{title:"Irrigation Source"}}/>
-          <Stack.Screen name="Job" component={Job}/>
-          <Stack.Screen name="DailyEntry" component={DailyEntry}/>
-          <Stack.Screen name="UpdateDailyEntry" component={UpdateDailyEntry}/>
-          <Stack.Screen name="Stages" component={Stages}/>
-          <Stack.Screen name="Vehicle" component={Vehicle}/>
-          <Stack.Screen name="Search"  component={Search}/>
-          <Stack.Screen name="FarmReport"  component={FarmReport}/>
-          <Stack.Screen name="Reports"  component={Reports}/>
-          <Stack.Screen name="Supplier"  component={Supplier}/>
-          <Stack.Screen name="Inventory"  component={Inventory}/>
-          <Stack.Screen name="Receives"  component={Receives}/>
-    </Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: theme.colors.blue,
+          },
+          headerTintColor: theme.colors.white,
+        }}
+        initialRouteName='Splash'>
+        <Stack.Screen name="Splash" component={Splash} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Menu" component={Menu} />
+        <Stack.Screen name="Farms" component={Farms} />
+        <Stack.Screen name="Plot" component={Plot} />
+        <Stack.Screen name="Variety" component={Variety} />
+        <Stack.Screen name="Product" component={Product} />
+        <Stack.Screen name="Category" component={Category} />
+        <Stack.Screen name="Implements" component={Implements} />
+        <Stack.Screen name="IrrigationSr" component={IrrigationSr} options={{ title: "Irrigation Source" }} />
+        <Stack.Screen name="Job" component={Job} />
+        <Stack.Screen name="DailyEntry" component={DailyEntry} />
+        <Stack.Screen name="UpdateDailyEntry" component={UpdateDailyEntry} />
+        <Stack.Screen name="Stages" component={Stages} />
+        <Stack.Screen name="Vehicle" component={Vehicle} />
+        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="FarmReport" component={FarmReport} />
+        <Stack.Screen name="Reports" component={Reports} />
+        <Stack.Screen name="Supplier" component={Supplier} />
+        <Stack.Screen name="Inventory" component={Inventory} />
+        <Stack.Screen name="Receives" component={Receives} />
+        <Stack.Screen name="InventoryReport" component={InventoryReport} />
+      </Stack.Navigator>
     </NavigationContainer>
   )
 }

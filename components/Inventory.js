@@ -25,12 +25,12 @@ export default function Inventory({ route }) {
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => { navigation.navigate('Plot', { email: email }) }} style={{ elevation: 5, backgroundColor: theme.colors.white, width: '90%', borderRadius: 8, marginTop: '5%' }}>
+                {/* <TouchableOpacity onPress={() => { navigation.navigate('Plot', { email: email }) }} style={{ elevation: 5, backgroundColor: theme.colors.white, width: '90%', borderRadius: 8, marginTop: '5%' }}>
                     <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', height: 40, padding: '2%' }}>
                         <Text style={{ color: 'black' }}>Issue</Text>
                         <Image source={require('../assets/chevron.png')} style={{ height: 15, width: 15 }} />
                     </View>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         )
     }

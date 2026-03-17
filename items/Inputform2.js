@@ -13,6 +13,7 @@ export default function Inputform2(props) {
                         height: 40
                     }}
                     key={props.key}
+                    keyboardType={props.type ? props.type : "default"}
                     onChangeText={props.onChange}
                     value={props.value}
                     secureTextEntry={false}

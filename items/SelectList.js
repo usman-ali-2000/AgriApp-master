@@ -22,7 +22,7 @@ const SelectList = ({
                         flexDirection: 'row',
                         paddingTop: 8,
                         paddingRight: 10,
-                        height: 45,
+                        height: 40,
                         backgroundColor: 'lightgrey',
                         borderRadius: 8,
                         alignItems: 'center'
@@ -62,7 +62,7 @@ const SelectList = ({
                         maxHeight: 100
                     }}
                 >
-                    <ScrollView>
+                    <ScrollView nestedScrollEnabled>
                         <FlatList
                             data={data}
                             keyExtractor={(item, index) => item.id?.toString() || index.toString()}

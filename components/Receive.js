@@ -276,21 +276,24 @@ export default function Receives({ route }) {
                 </View>
                 <View style={{ flexDirection: 'column', width: '45%', marginTop: '5%' }}>
                     <Text style={{ width: '100%', fontSize: 15, color: 'black' }}>Enter Quantity</Text>
-                    <TextInput
-                        ref={focusRef}
-                        style={{
-                            color: 'black',
-                            width: '100%',
-                            backgroundColor: 'lightgrey',
-                            marginVertical: 10,
-                            borderRadius: 8,
-                            height: 45
-                        }}
-                        placeholder="Enter Quantity"
-                        onChangeText={handleTextChange}
-                        value={inputQuantity}
-                        secureTextEntry={false}
-                    />
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TextInput
+                            ref={focusRef}
+                            style={{
+                                color: 'black',
+                                width: '100%',
+                                backgroundColor: 'lightgrey',
+                                marginVertical: 10,
+                                borderRadius: 8,
+                                height: 45
+                            }}
+                            placeholder="Enter Quantity"
+                            onChangeText={handleTextChange}
+                            value={inputQuantity}
+                            secureTextEntry={false}
+                        />
+                        <Text style={{ fontWeight: 'bold', fontSize: 20, color: theme.colors.black, marginLeft:'5%'}}>{selectedProd ? selectedProd.unit : ''}</Text>
+                    </View>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '70%', paddingTop: 30 }}>
                     <Pressable onPress={handleSubmit}>

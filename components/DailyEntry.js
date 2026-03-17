@@ -4,6 +4,7 @@ import Inputform from "../items/Inputform";
 import Inputform2 from "../items/Inputform2";
 import { BaseUrl } from "../assets/Data";
 import DateItem from "../items/DateItem";
+import SelectList from "../items/SelectList";
 
 export default function DailyEntry({ route, navigation }) {
 
@@ -62,6 +63,12 @@ export default function DailyEntry({ route, navigation }) {
     const [openSubSowing, setOpenSubSowing] = useState(false);
     const [dailyentry, setDailyentry] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [category, setCategory] = useState('');
+    const [product, setProduct] = useState('');
+    const [machine, setMachine] = useState('');
+    const [openMachine, setOpenMachine] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [openProduct, setOpenProduct] = useState(false);
 
 
     const stageInfo = [
@@ -80,6 +87,8 @@ export default function DailyEntry({ route, navigation }) {
         }
     ]
 
+
+
     const substageInfo = [
         {
             text: "Gobal"
@@ -94,6 +103,11 @@ export default function DailyEntry({ route, navigation }) {
         }, {
             text: "Khila"
         },
+    ]
+
+    const machinery = [
+        { machine: 'tractor' },
+        { machine: 'routavator' }
     ]
 
     const subFertilizerInfo = [
@@ -143,7 +157,10 @@ export default function DailyEntry({ route, navigation }) {
         try {
             setLoading(true);
             const response = await fetch(`${BaseUrl}/counter`);
+            const resProd = await fetch(`${BaseUrl}/product`);
             const json = await response.json();
+            const jsonProd = await resProd.json();
+            setProducts(jsonProd);
             // setDailyentry(json);
             console.log('json imp:', json[0].seq);
             // const lng = json[json.length - 1];
@@ -228,33 +245,69 @@ export default function DailyEntry({ route, navigation }) {
     const handleSubmit = async () => {
         if (farm && plot && area && stage) {
             setLoading(true);
-            const data = { id: length, farm: farm, plot: block + plot, area: area, stage: stage, type: subStage, deal: contract ? 'contract' : 'self', time: duration ? (durationPeriod) : (start + ' to ' + end), mean: contract ? (null) : (manpower || stage === "sowing" ? 'Man Power' : 'tractor'), fuel: contract ? (null) : (manpower ? null : diesel), person: contract ? (null) : (manpower || self ? persons : null), quantity: qty, moga: moga, units: unit, email: email, date: date1 };
-            const response = await fetch(`${BaseUrl}/dailyentry`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+            console.log(farm, block + plot, area, stage, product._id);
 
-            });
-            if (response.ok) {
-                Alert.alert('Uploaded...');
-            } else {
-                Alert.alert('error uploading...');
+            try {
+                const data = {
+                    id: length,
+                    farm: farm,
+                    plot: block + plot,
+                    area: area,
+                    stage: stage,
+                    type: stage === 'land preparation' ? subStage : stage === 'fertilizer' ? subFertilizer : stage === 'sowing' ? subsowing : stage === 'weedicides' ? subWeedicides : subPesticides,
+                    deal: contract ? 'contract' : 'self',
+                    time: duration ? durationPeriod : (start + ' to ' + end),
+                    mean: contract ? null : (manpower || stage === "sowing" ? 'Man Power' : 'tractor'),
+                    fuel: diesel,
+                    category: category,
+                    machinery: machine?.machine,
+                    product: product._id,
+                    // prodUnit: product ? product.unit : '',
+                    quantity: qty,
+                    moga: moga,
+                    units: unit,
+                    email: email,
+                    date: date1
+                };
+
+                const response = await fetch(`${BaseUrl}/dailyentry`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    Alert.alert('Uploaded successfully');
+                    setFarm(null);
+                    setPlot(0);
+                    setArea('');
+                    setBlock('');
+                    setStage('');
+                    setCategory('');
+                    setProduct(null);
+                    setMachine(null);
+                    setQty('');
+                    setMoga('');
+                    setUnit('');
+                    setDiesel(null);
+                    fetchDailyEntry();
+                } else {
+                    Alert.alert('Error uploading data');
+                }
+
+            } catch (error) {
+                console.log("Upload Error:", error);
+                Alert.alert('Network error');
             }
-        } else {
-            setLoading(false);
-            Alert.alert('required fields are empty');
-        }
-        setLoading(false);
-        setFarm(null);
-        setPlot(0);
-        setArea();
-        setBlock();
-        setStage();
-        fetchDailyEntry();
-    }
 
+            setLoading(false);
+
+        } else {
+            Alert.alert('Required fields are empty');
+        }
+    };
 
 
     // const fetchPlotNo = async() => {
@@ -278,7 +331,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const farmData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={userData}
                     keyExtractor={(item) => item.id}
@@ -309,7 +362,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const plotInfo = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={plotData}
                     keyExtractor={(item) => item.id}
@@ -336,7 +389,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const stageData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={stageInfo}
                     renderItem={({ item }) => {
@@ -358,7 +411,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const substageData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={substageInfo}
                     renderItem={({ item }) => {
@@ -380,7 +433,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const subfertilizerData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={subFertilizerInfo}
                     renderItem={({ item }) => {
@@ -403,7 +456,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const subWeedicidesData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={subWeedicidesInfo}
                     renderItem={({ item }) => {
@@ -425,7 +478,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const subPesticidesData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={subPesticidesInfo}
                     renderItem={({ item }) => {
@@ -447,7 +500,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const subSowingData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={subSowingInfo}
                     renderItem={({ item }) => {
@@ -469,7 +522,7 @@ export default function DailyEntry({ route, navigation }) {
 
     const subIrrigationData = () => {
         return (
-            <ScrollView>
+            <ScrollView nestedScrollEnabled>
                 <FlatList
                     data={subIrrigationInfo}
                     renderItem={({ item }) => {
@@ -579,935 +632,408 @@ export default function DailyEntry({ route, navigation }) {
     }, [length]);
 
     return (
-        <ScrollView contentContainerStyle={{ width: '100%', flex: 1, backgroundColor: 'white', justifyContent: 'flex-start', alignItems: 'center' }} showsVerticalScrollIndicator={false}>
-            <View style={{
-                height: '100%',
-                width: '100%',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'white'
-            }}>
+        <View style={{ flex: 1, backgroundColor: 'white' }}>
+            <ScrollView contentContainerStyle={{ width: '100%', backgroundColor: 'white', justifyContent: 'flex-start', alignItems: 'center' }} showsVerticalScrollIndicator={false}>
                 <View style={{
-                    width: '87%',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginLeft: '0%',
-                    // borderWidth:1
-                }}>
-                    <View style={{
-                        width: '45%'
-                    }}>
-                        <Inputform2 heading="Code" value={length.toString()} />
-                    </View>
-                    <View style={{
-                        width: '55%',
-                        paddingLeft: '15%'
-                    }}>
-                        <DateItem
-                            label="Entry Date"
-                            value={[date1]}
-                            onChange={setDate1}
-                        />
-                        {/* <Text>Selected date: {date1}</Text> */}
-                        {/* <Inputform2 heading="Date" value={date1} onChange={handleDate} /> */}
-                    </View>
-                </View>
-                <View style={{
+                    height: '100%',
                     width: '100%',
-                    flexDirection: 'row',
-                    justifyContent: 'center'
-                }}>
-                    <View style={{
-                        width: '45%'
-                    }}>
-                        <Inputform heading="Farm" text={farmName} onPress={() => { handleFarm() }} openDrop={openFarm} Dropdown={farmData()} />
-                    </View>
-                    <View style={{
-                        width: '45%'
-                    }}>
-                        <Inputform heading="Plot" text={block + plot} onPress={() => { handlePlot() }} openDrop={openPlot} Dropdown={plotInfo()} />
-                    </View>
-                </View>
-                <View style={{
-                    width: '100%',
-                    flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    paddingTop: '2%'
+                    backgroundColor: 'white'
                 }}>
                     <View style={{
-                        width: '45%'
+                        width: '87%',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginLeft: '0%',
+                        // borderWidth:1
                     }}>
-                        <Inputform2 heading="Area" value={area} />
+                        <View style={{
+                            width: '45%'
+                        }}>
+                            <Inputform2 heading="Code" value={length.toString()} />
+                        </View>
+                        <View style={{
+                            width: '55%',
+                            paddingLeft: '15%'
+                        }}>
+                            <DateItem
+                                label="Entry Date"
+                                value={[date1]}
+                                onChange={setDate1}
+                            />
+                            {/* <Text>Selected date: {date1}</Text> */}
+                            {/* <Inputform2 heading="Date" value={date1} onChange={handleDate} /> */}
+                        </View>
                     </View>
                     <View style={{
-                        width: '45%'
+                        width: '100%',
+                        flexDirection: 'row',
+                        justifyContent: 'center'
                     }}>
-                        <Inputform heading="Stage" text={stage} onPress={() => { handleStage() }} openDrop={openStage} Dropdown={stageData()} />
+                        <View style={{
+                            width: '45%'
+                        }}>
+                            <Inputform heading="Farm" text={farmName} onPress={() => { handleFarm() }} openDrop={openFarm} Dropdown={farmData()} />
+                        </View>
+                        <View style={{
+                            width: '45%'
+                        }}>
+                            <Inputform heading="Plot" text={block + plot} onPress={() => { handlePlot() }} openDrop={openPlot} Dropdown={plotInfo()} />
+                        </View>
                     </View>
-                </View>
-                {stage === 'land preparation' && <View style={{
-                    width: '100%',
-                    padding: 10,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                }}>
                     <View style={{
                         width: '100%',
                         flexDirection: 'row',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        paddingTop: '2%',
+                        paddingTop: '2%'
                     }}>
                         <View style={{
-                            width: '45%',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            // marginLeft:'0%'
+                            width: '45%'
                         }}>
-                            <Inputform heading="Sub-Stage" text={subStage} onPress={() => { handleSubStage() }} openDrop={openSubStage} Dropdown={substageData()} />
+                            <Inputform2 heading="Area" value={area} />
                         </View>
                         <View style={{
-                            width: '20%',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            paddingTop: '5%',
-                            marginRight: '5%',
+                            width: '45%'
                         }}>
-                            <Pressable style={{
-                                flexDirection: 'row',
-                            }} onPress={() => {
-                                setSelf(true);
-                                setContract(false);
-                            }}>
-                                <View style={{
-                                    height: 20,
-                                    width: 20,
-                                    borderRadius: 20,
-                                    borderWidth: 1,
-                                    backgroundColor: self ? 'black' : 'white'
-                                }} />
-                                <Text
-                                    style={{
-                                        paddingLeft: 10
-                                    }}>self</Text>
-                            </Pressable>
+                            <Inputform heading="Stage" text={stage} onPress={() => { handleStage() }} openDrop={openStage} Dropdown={stageData()} />
                         </View>
+                    </View>
+                    <View style={{
+                        width: '90%',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        paddingTop: '2%'
+                    }}>
+                        <View style={{ width: '49%' }}>
+                            <SelectList
+                                heading={"Machinery"}
+                                data={machinery}
+                                labelKey="machine"
+                                placeholder="Select Machine"
+                                value={machine}   // full selected object OR null
+                                onChange={(item) => setMachine(item)}
+                                onClose={() => setOpenMachine(false)}
+                            />
+                        </View>
+                        <View style={{ width: '49%' }}>
+                            <SelectList
+                                heading={"Product"}
+                                data={products}
+                                labelKey="product"
+                                placeholder="Select Product"
+                                value={product}   // full selected object OR null
+                                onChange={(item) => setProduct(item)}
+                                onClose={() => setOpenProduct(false)}
+                            />
+                        </View>
+                    </View>
+                    <View style={{
+                        width: '100%',
+                        flexDirection: 'row',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: '5%',
+                    }}>
+                        <View style={{ width: '45%' }}>
+                            <Inputform2 heading="Product Quantity" type="numeric" value={qty} onChange={handleQty} />
+                        </View>
+                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: 'black', marginTop: '5%' }}>{product ? product.unit : ''}</Text>
+                    </View>
+                    {stage === 'land preparation' && <View style={{
+                        width: '100%',
+                        padding: 10,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column',
+                    }}>
                         <View style={{
-                            width: '20%',
+                            width: '100%',
                             flexDirection: 'row',
                             justifyContent: 'center',
                             alignItems: 'center',
                             paddingTop: '2%',
-                            marginRight: '5%',
-                            marginTop: '2%'
-                        }}>
-                            <Pressable style={{
-                                flexDirection: 'row',
-                            }} onPress={() => {
-                                setContract(true);
-                                setSelf(false);
-                            }}>
-                                <View style={{
-                                    height: 20,
-                                    width: 20,
-                                    borderWidth: 1,
-                                    borderRadius: 20,
-                                    borderColor: 'black',
-                                    backgroundColor: contract ? 'black' : 'white'
-                                }} />
-                                <Text
-                                    style={{
-                                        paddingLeft: 10
-                                    }}>contract</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingTop: 10
-                    }}>
-                        <View style={{
-                            width: '30%',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            paddingTop: 10,
                         }}>
                             <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                width: '45%',
+                                justifyContent: 'center',
                                 alignItems: 'center',
-                                paddingTop: 10,
+                                // marginLeft:'0%'
                             }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Time</Text>
-                                </Pressable>
+                                <Inputform heading="Sub-Stage" text={subStage} onPress={() => { handleSubStage() }} openDrop={openSubStage} Dropdown={substageData()} />
                             </View>
                             <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(true);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Duration</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        <View style={{
-                            width: '40%'
-                        }}>
-                            {duration ?
-                                <View style={{ width: '100%', flexDirection: 'row' }}>
-                                    <View style={{ width: '70%' }}>
-                                        <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
-                                    </View>
-                                    <View style={{ width: '30%' }}>
-                                        <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
-                                    </View>
-                                </View>
-                                : <View style={{ width: '100%', flexDirection: 'row' }}>
-                                    <View style={{ width: '50%' }}>
-                                        <Inputform2 heading="start" value={start} onChange={handleStart} />
-                                    </View>
-                                    <View style={{ width: '50%' }}>
-                                        <Inputform2 heading="end" value={end} onChange={handleEnd} />
-                                    </View>
-                                </View>}
-                        </View>
-                        {self && <View style={{
-                            width: '20%'
-                        }}>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setManPower(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: manpower === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Tractor</Text>
-                                </Pressable>
-                            </View>
-                        </View>}
-                    </View>
-                    {self && <View style={{
-                        width: '30%',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginRight: '0%'
-                    }}>
-                        <Inputform2 heading="Diesel" value={diesel} onChange={handleDiesel} />
-                        <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
-                    </View>}
-                </View>
-                }
-                {stage === 'fertilizer' && <View style={{
-                    width: '100%',
-                    padding: 10,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column'
-                }}>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        paddingTop: 10
-                    }}>
-                        <View style={{
-                            width: '45%'
-                        }}>
-                            <Inputform heading="Sub-Stage" text={subFertilizer} onPress={() => { handleSubFertilizer() }} openDrop={openSubFertilizer} Dropdown={subfertilizerData()} />
-                        </View>
-                        <View style={{
-                            width: '45%',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            // borderWidth:1
-                        }}>
-                            <View style={{
-                                width: '100%',
+                                width: '20%',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                marginRight: '5%'
+                                paddingTop: '5%',
+                                marginRight: '5%',
                             }}>
                                 <Pressable style={{
-                                    flexDirection: 'row'
+                                    flexDirection: 'row',
                                 }} onPress={() => {
-                                    setManPower(true);
+                                    setSelf(true);
+                                    setContract(false);
                                 }}>
                                     <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
+                                        height: 20,
+                                        width: 20,
                                         borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: manpower ? 'black' : 'white'
+                                        borderWidth: 1,
+                                        backgroundColor: self ? 'black' : 'white'
                                     }} />
                                     <Text
                                         style={{
-                                            paddingLeft: '5%',
-                                        }}>Man Power</Text>
+                                            paddingLeft: 10
+                                        }}>self</Text>
                                 </Pressable>
                             </View>
                             <View style={{
-                                width: '100%',
+                                width: '20%',
                                 flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                justifyContent: 'center',
                                 alignItems: 'center',
-                                paddingTop: 10,
-                                marginLeft: '32%'
+                                paddingTop: '2%',
+                                marginRight: '5%',
+                                marginTop: '2%'
                             }}>
                                 <Pressable style={{
-                                    flexDirection: 'row'
+                                    flexDirection: 'row',
                                 }} onPress={() => {
-                                    setManPower(false);
+                                    setContract(true);
+                                    setSelf(false);
                                 }}>
                                     <View style={{
-                                        height: 15,
-                                        width: 15,
+                                        height: 20,
+                                        width: 20,
                                         borderWidth: 1,
                                         borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: manpower === false ? 'black' : 'white'
+                                        borderColor: 'black',
+                                        backgroundColor: contract ? 'black' : 'white'
                                     }} />
                                     <Text
                                         style={{
-                                            paddingLeft: 10,
-                                        }}>Tractor</Text>
+                                            paddingLeft: 10
+                                        }}>contract</Text>
                                 </Pressable>
                             </View>
                         </View>
-                    </View>
-                    {manpower && self && <View style={{
-                        width: '40%',
-                    }}>
-                        <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
-                    </View>}
-                    {manpower === false && <View style={{
-                        width: '30%',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginRight: 30
-                    }}>
-                        <Inputform2 heading="Diesel" value={diesel} onChange={handleDiesel} />
-                        <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
-                    </View>}
-                </View>}
-                {stage === 'weedicides' && <View style={{
-                    width: '100%',
-                    padding: 10,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column'
-                }}>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        paddingTop: 10
-                    }}>
                         <View style={{
-                            width: '40%'
-                        }}>
-                            <Inputform heading="Sub-Stage" text={subWeedicides} onPress={() => { handleSubWeedicides() }} openDrop={openSubWeedicides} Dropdown={subWeedicidesData()} />
-                        </View>
-                        <View style={{
-                            width: '20%',
+                            width: '100%',
+                            flexDirection: 'row',
                             justifyContent: 'center',
                             alignItems: 'center',
-                        }}>
-                            <Inputform2 heading="Qty" value={qty} onChange={handleQty} />
-                        </View>
-                        <View style={{
-                            width: '20%'
+                            paddingTop: 10
                         }}>
                             <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                width: '30%',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
                                 alignItems: 'center',
                                 paddingTop: 10,
-                                marginTop: '25%'
                             }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setManPower(false);
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
                                 }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: manpower === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Tractor</Text>
-                                </Pressable>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Time</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Duration</Text>
+                                    </Pressable>
+                                </View>
                             </View>
+                            <View style={{
+                                width: '40%'
+                            }}>
+                                {duration ?
+                                    <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '70%' }}>
+                                            <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
+                                        </View>
+                                        <View style={{ width: '30%' }}>
+                                            <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
+                                        </View>
+                                    </View>
+                                    : <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '50%' }}>
+                                            <Inputform2 heading="start" value={start} onChange={handleStart} />
+                                        </View>
+                                        <View style={{ width: '50%' }}>
+                                            <Inputform2 heading="end" value={end} onChange={handleEnd} />
+                                        </View>
+                                    </View>}
+                            </View>
+                            {self && <View style={{
+                                width: '20%'
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setManPower(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: manpower === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Tractor</Text>
+                                    </Pressable>
+                                </View>
+                            </View>}
                         </View>
-                    </View>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingTop: 10
-                    }}>
-                        <View style={{
+                        {self && <View style={{
                             width: '30%',
                             flexDirection: 'row',
                             alignItems: 'center',
-                            marginRight: 30
+                            marginRight: '0%'
                         }}>
-                            <Inputform2 heading="Diesel" value={diesel} onChange={handleDiesel} />
-                            <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
-                        </View>
-                        <View style={{
-                            width: '40%',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            padding: 10,
-                        }}>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Time</Text>
-                                </Pressable>
-                            </View>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(true);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Duration</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    </View>
-                    <View style={{
-                        width: '50%',
-                        marginLeft: '15%'
-                    }}>
-                        {duration ?
-                            <View style={{ width: '100%', flexDirection: 'row' }}>
-                                <View style={{ width: '70%' }}>
-                                    <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
-                                </View>
-                                <View style={{ width: '30%' }}>
-                                    <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
-                                </View>
-                            </View>
-                            : <View style={{ width: '100%', flexDirection: 'row' }}>
-                                <View style={{ width: '50%' }}>
-                                    <Inputform2 heading="start" value={start.toString()} onChange={handleStart} />
-                                </View>
-                                <View style={{ width: '50%' }}>
-                                    <Inputform2 heading="end" value={end.toString()} onChange={handleEnd} />
-                                </View>
-                            </View>}
-                    </View>
-                </View>
-                }
-                {stage === 'sowing' && <View style={{
-                    width: '100%',
-                    padding: 10,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column'
-                }}>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        paddingTop: 10,
-                        marginRight: '5%'
-                    }}>
-                        <View style={{
-                            width: '47%'
-                        }}>
-                            <Inputform heading="Sowing-type" text={subsowing} onPress={() => { handleSubSowing() }} openDrop={openSubSowing} Dropdown={subSowingData()} />
-                        </View>
-                        <View style={{
-                            width: '25%',
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            paddingTop: 10
-                        }}>
-                            <Pressable style={{
-                                flexDirection: 'row'
-                            }} onPress={() => {
-                                setSelf(true);
-                                setContract(false);
-                            }}>
-                                <View style={{
-                                    height: 20,
-                                    width: 20,
-                                    borderWidth: 1,
-                                    borderRadius: 20,
-                                    backgroundColor: self ? 'black' : 'white'
-                                }} />
-                                <Text
-                                    style={{
-                                        paddingLeft: 10
-                                    }}>self</Text>
-                            </Pressable>
-                        </View>
-                        <View style={{
-                            width: '20%',
-                            flexDirection: 'row',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            paddingTop: 10
-                        }}>
-                            <Pressable style={{
-                                flexDirection: 'row'
-                            }} onPress={() => {
-                                setContract(true);
-                                setSelf(false);
-                            }}>
-                                <View style={{
-                                    height: 20,
-                                    width: 20,
-                                    borderWidth: 1,
-                                    borderRadius: 20,
-                                    backgroundColor: contract ? 'black' : 'white'
-                                }} />
-                                <Text
-                                    style={{
-                                        paddingLeft: 10
-                                    }}>contract</Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingTop: 10,
-                        marginRight: '15%'
-                    }}>
-                        <View style={{
-                            width: '45%',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            paddingTop: 10,
-                        }}>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Time</Text>
-                                </Pressable>
-                            </View>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(true);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Duration</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        <View style={{
-                            width: '20%'
-                        }}>
-                            {duration ?
-                                <View style={{ width: '100%', flexDirection: 'row' }}>
-                                    <View style={{ width: '100%' }}>
-                                        <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
-                                    </View>
-                                    <View style={{ width: '30%' }}>
-                                        <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
-                                    </View>
-                                </View>
-                                : <View style={{ width: '100%', flexDirection: 'row' }}>
-                                    <View style={{ width: '100%' }}>
-                                        <Inputform2 heading="start" value={start} onChange={handleStart} />
-                                    </View>
-                                    <View style={{ width: '100%' }}>
-                                        <Inputform2 heading="end" value={end} onChange={handleEnd} />
-                                    </View>
-                                </View>}
-                        </View>
-                    </View>
-                    {self && <View style={{
-                        width: '40%'
-                    }}>
-                        <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
-                    </View>}
-                </View>
-                }
-                {stage === 'irrigation' && <View style={{
-                    width: '100%',
-                    padding: 10,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column'
-                }}>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        // paddingTop:10, 
-                        marginRight: '0%'
-                    }}>
-                        <View style={{
-                            width: '47%'
-                        }}>
-                            <Inputform heading="Sources" text={subIrrigation} onPress={() => { handleSubIrrigation() }} openDrop={openSubIrrigation} Dropdown={subIrrigationData()} />
-                        </View>
-                        {subIrrigation === 'canal' && <View style={{
-                            width: '47%',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                            <Inputform2 heading="Moga" value={moga} onChange={handleMoga} />
-                        </View>}
-                        {subIrrigation === 'china engine' && <View style={{
-                            width: '40%',
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginRight: 30,
-                        }}>
-                            <Inputform2 heading="Diesel" value={diesel} onChange={handleDiesel} />
+                            <Inputform2 heading="Diesel (if use)" value={diesel} onChange={handleDiesel} />
                             <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
                         </View>}
-                        {subIrrigation === 'electric turbine' && <View style={{
-                            width: '40%',
+                    </View>
+                    }
+                    {stage === 'fertilizer' && <View style={{
+                        width: '100%',
+                        padding: 10,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column'
+                    }}>
+                        <View style={{
+                            width: '100%',
                             flexDirection: 'row',
-                            alignItems: 'center',
-                            marginRight: 30
-                        }}>
-                            <Inputform2 heading="Units" value={unit} onChange={handleUnit} />
-                            <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>units</Text>
-                        </View>}
-                    </View>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingTop: 10
-                    }}>
-                        <View style={{
-                            width: '40%',
-                            flexDirection: 'column',
                             justifyContent: 'center',
-                            alignItems: 'center',
-                            padding: 10,
+                            paddingTop: 10
                         }}>
                             <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
+                                width: '45%'
                             }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Time</Text>
-                                </Pressable>
+                                <Inputform heading="Sub-Stage" text={subFertilizer} onPress={() => { handleSubFertilizer() }} openDrop={openSubFertilizer} Dropdown={subfertilizerData()} />
                             </View>
                             <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
+                                width: '45%',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
                                 alignItems: 'center',
-                                paddingTop: 10,
+                                // borderWidth:1
                             }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(true);
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    marginRight: '5%'
                                 }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Duration</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        <View style={{
-                            width: '45%',
-                            marginLeft: '5%'
-                        }}>
-                            {duration ?
-                                <View style={{ width: '100%', flexDirection: 'row' }}>
-                                    <View style={{ width: '70%' }}>
-                                        <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
-                                    </View>
-                                    <View style={{ width: '30%' }}>
-                                        <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
-                                    </View>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setManPower(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: manpower ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: '5%',
+                                            }}>Man Power</Text>
+                                    </Pressable>
                                 </View>
-                                : <View style={{ width: '100%', flexDirection: 'row' }}>
-                                    <View style={{ width: '50%' }}>
-                                        <Inputform2 heading="start" value={start.toString()} onChange={handleStart} />
-                                    </View>
-                                    <View style={{ width: '50%' }}>
-                                        <Inputform2 heading="end" value={end.toString()} onChange={handleEnd} />
-                                    </View>
-                                </View>}
-                        </View>
-                    </View>
-                </View>
-                }
-                {stage === 'pesticides' && <View style={{
-                    width: '100%',
-                    // padding:10, 
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                }}>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        paddingTop: 10
-                    }}>
-                        <View style={{
-                            width: '45%'
-                        }}>
-                            <Inputform heading="Sub-Stage" text={subPesticides} onPress={() => { handlePesticides() }} openDrop={openSubPesticides} Dropdown={subPesticidesData()} />
-                        </View>
-                        <View style={{
-                            width: '20%',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                            <Inputform2 heading="Qty" value={qty} onChange={handleQty} />
-                        </View>
-                    </View>
-                    <View style={{
-                        width: '100%',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingTop: 10
-                    }}><View style={{
-                        width: '37%',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setManPower(true);
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                    marginLeft: '32%'
                                 }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: manpower ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Man Power</Text>
-                                </Pressable>
-                            </View>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
-                            }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setManPower(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: manpower === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                            color: 'black'
-                                        }}>Tractor</Text>
-                                </Pressable>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setManPower(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: manpower === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Tractor</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
                         {manpower && self && <View style={{
-                            width: '40%'
+                            width: '40%',
                         }}>
                             <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
                         </View>}
@@ -1517,78 +1043,147 @@ export default function DailyEntry({ route, navigation }) {
                             alignItems: 'center',
                             marginRight: 30
                         }}>
-                            <Inputform2 heading="Diesel" value={diesel} onChange={handleDiesel} />
+                            <Inputform2 heading="Diesel (if use)" value={diesel} onChange={handleDiesel} />
                             <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
                         </View>}
-                    </View>
-                    <View style={{
+                    </View>}
+                    {stage === 'weedicides' && <View style={{
                         width: '100%',
-                        flexDirection: 'row',
+                        padding: 10,
+                        justifyContent: 'center',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        flexDirection: 'column'
                     }}>
                         <View style={{
-                            width: '40%',
-                            flexDirection: 'column',
+                            width: '100%',
+                            flexDirection: 'row',
                             justifyContent: 'center',
-                            alignItems: 'center',
-                            padding: 10,
+                            paddingTop: 10
                         }}>
                             <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: 10,
+                                width: '40%'
                             }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(false);
-                                }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration === false ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Time</Text>
-                                </Pressable>
+                                <Inputform heading="Sub-Stage" text={subWeedicides} onPress={() => { handleSubWeedicides() }} openDrop={openSubWeedicides} Dropdown={subWeedicidesData()} />
                             </View>
-                            <View style={{
-                                width: '100%',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
+                            {/* <View style={{
+                                width: '20%',
+                                justifyContent: 'center',
                                 alignItems: 'center',
-                                paddingTop: 10,
                             }}>
-                                <Pressable style={{
-                                    flexDirection: 'row'
-                                }} onPress={() => {
-                                    setDuration(true);
+                                <Inputform2 heading="Qty" value={qty} onChange={handleQty} />
+                            </View> */}
+                            <View style={{
+                                width: '20%'
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                    marginTop: '25%'
                                 }}>
-                                    <View style={{
-                                        height: 15,
-                                        width: 15,
-                                        borderWidth: 1,
-                                        borderRadius: 20,
-                                        marginTop: 3,
-                                        backgroundColor: duration ? 'black' : 'white'
-                                    }} />
-                                    <Text
-                                        style={{
-                                            paddingLeft: 10,
-                                        }}>Duration</Text>
-                                </Pressable>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setManPower(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: manpower === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Tractor</Text>
+                                    </Pressable>
+                                </View>
                             </View>
                         </View>
                         <View style={{
-                            width: '40%'
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingTop: 10
+                        }}>
+                            <View style={{
+                                width: '30%',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginRight: 30
+                            }}>
+                                <Inputform2 heading="Diesel (if use)" value={diesel} onChange={handleDiesel} />
+                                <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
+                            </View>
+                            <View style={{
+                                width: '40%',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                padding: 10,
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Time</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Duration</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                        </View>
+                        <View style={{
+                            width: '50%',
+                            marginLeft: '15%'
                         }}>
                             {duration ?
                                 <View style={{ width: '100%', flexDirection: 'row' }}>
@@ -1609,44 +1204,545 @@ export default function DailyEntry({ route, navigation }) {
                                 </View>}
                         </View>
                     </View>
-                </View>
-                }
-                <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '60%', paddingTop: 30 }}>
-                    <Pressable
-                        style={{
-                            paddingTop: 30,
-                        }}
-                        onPress={handleSubmit}>
-                        <Text style={{
-                            height: 30,
-                            width: 80,
-                            borderWidth: 1,
-                            borderColor: 'black',
-                            textAlign: 'center',
-                            paddingTop: 3,
-                            borderRadius: 5,
-                            elevation: 5,
-                            backgroundColor: 'black',
-                            color: 'white',
-                            fontWeight: '400'
-                        }}>Save</Text>
-                    </Pressable>
-                    <Pressable style={{ paddingTop: 30, }}>
-                        <Text onPress={() => navigation.navigate('Search', { email: email })}
+                    }
+                    {stage === 'sowing' && <View style={{
+                        width: '100%',
+                        padding: 10,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column'
+                    }}>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            paddingTop: 10,
+                            marginRight: '5%'
+                        }}>
+                            <View style={{
+                                width: '47%'
+                            }}>
+                                <Inputform heading="Sowing-type" text={subsowing} onPress={() => { handleSubSowing() }} openDrop={openSubSowing} Dropdown={subSowingData()} />
+                            </View>
+                            <View style={{
+                                width: '25%',
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                paddingTop: 10
+                            }}>
+                                <Pressable style={{
+                                    flexDirection: 'row'
+                                }} onPress={() => {
+                                    setSelf(true);
+                                    setContract(false);
+                                }}>
+                                    <View style={{
+                                        height: 20,
+                                        width: 20,
+                                        borderWidth: 1,
+                                        borderRadius: 20,
+                                        backgroundColor: self ? 'black' : 'white'
+                                    }} />
+                                    <Text
+                                        style={{
+                                            paddingLeft: 10
+                                        }}>self</Text>
+                                </Pressable>
+                            </View>
+                            <View style={{
+                                width: '20%',
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                paddingTop: 10
+                            }}>
+                                <Pressable style={{
+                                    flexDirection: 'row'
+                                }} onPress={() => {
+                                    setContract(true);
+                                    setSelf(false);
+                                }}>
+                                    <View style={{
+                                        height: 20,
+                                        width: 20,
+                                        borderWidth: 1,
+                                        borderRadius: 20,
+                                        backgroundColor: contract ? 'black' : 'white'
+                                    }} />
+                                    <Text
+                                        style={{
+                                            paddingLeft: 10
+                                        }}>contract</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingTop: 10,
+                            marginRight: '15%'
+                        }}>
+                            <View style={{
+                                width: '45%',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                paddingTop: 10,
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Time</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Duration</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                            <View style={{
+                                width: '20%'
+                            }}>
+                                {duration ?
+                                    <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '100%' }}>
+                                            <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
+                                        </View>
+                                        <View style={{ width: '30%' }}>
+                                            <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
+                                        </View>
+                                    </View>
+                                    : <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '100%' }}>
+                                            <Inputform2 heading="start" value={start} onChange={handleStart} />
+                                        </View>
+                                        <View style={{ width: '100%' }}>
+                                            <Inputform2 heading="end" value={end} onChange={handleEnd} />
+                                        </View>
+                                    </View>}
+                            </View>
+                        </View>
+                        {self && <View style={{
+                            width: '40%'
+                        }}>
+                            <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
+                        </View>}
+                    </View>
+                    }
+                    {stage === 'irrigation' && <View style={{
+                        width: '100%',
+                        padding: 10,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column'
+                    }}>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            // paddingTop:10, 
+                            marginRight: '0%'
+                        }}>
+                            <View style={{
+                                width: '47%'
+                            }}>
+                                <Inputform heading="Sources" text={subIrrigation} onPress={() => { handleSubIrrigation() }} openDrop={openSubIrrigation} Dropdown={subIrrigationData()} />
+                            </View>
+                            {subIrrigation === 'canal' && <View style={{
+                                width: '47%',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <Inputform2 heading="Moga" value={moga} onChange={handleMoga} />
+                            </View>}
+                            {subIrrigation === 'china engine' && <View style={{
+                                width: '40%',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginRight: 30,
+                            }}>
+                                <Inputform2 heading="Diesel (if use)" value={diesel} onChange={handleDiesel} />
+                                <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
+                            </View>}
+                            {subIrrigation === 'electric turbine' && <View style={{
+                                width: '40%',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginRight: 30
+                            }}>
+                                <Inputform2 heading="Units" value={unit} onChange={handleUnit} />
+                                <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>units</Text>
+                            </View>}
+                        </View>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingTop: 10
+                        }}>
+                            <View style={{
+                                width: '40%',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                padding: 10,
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Time</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Duration</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                            <View style={{
+                                width: '45%',
+                                marginLeft: '5%'
+                            }}>
+                                {duration ?
+                                    <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '70%' }}>
+                                            <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
+                                        </View>
+                                        <View style={{ width: '30%' }}>
+                                            <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
+                                        </View>
+                                    </View>
+                                    : <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '50%' }}>
+                                            <Inputform2 heading="start" value={start.toString()} onChange={handleStart} />
+                                        </View>
+                                        <View style={{ width: '50%' }}>
+                                            <Inputform2 heading="end" value={end.toString()} onChange={handleEnd} />
+                                        </View>
+                                    </View>}
+                            </View>
+                        </View>
+                    </View>
+                    }
+                    {stage === 'pesticides' && <View style={{
+                        width: '100%',
+                        // padding:10, 
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column',
+                    }}>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            paddingTop: 10
+                        }}>
+                            <View style={{
+                                width: '45%'
+                            }}>
+                                <Inputform heading="Sub-Stage" text={subPesticides} onPress={() => { handlePesticides() }} openDrop={openSubPesticides} Dropdown={subPesticidesData()} />
+                            </View>
+                            {/* <View style={{
+                                width: '20%',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <Inputform2 heading="Qty" value={qty} onChange={handleQty} />
+                            </View> */}
+                        </View>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingTop: 10
+                        }}><View style={{
+                            width: '37%',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setManPower(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: manpower ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Man Power</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setManPower(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: manpower === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                                color: 'black'
+                                            }}>Tractor</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                            {manpower && self && <View style={{
+                                width: '40%'
+                            }}>
+                                <Inputform2 heading="Persons" value={persons.toString()} onChange={handlePerson} />
+                            </View>}
+                            {manpower === false && <View style={{
+                                width: '30%',
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginRight: 30
+                            }}>
+                                <Inputform2 heading="Diesel (if use)" value={diesel} onChange={handleDiesel} />
+                                <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>litre</Text>
+                            </View>}
+                        </View>
+                        <View style={{
+                            width: '100%',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <View style={{
+                                width: '40%',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                padding: 10,
+                            }}>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(false);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration === false ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Time</Text>
+                                    </Pressable>
+                                </View>
+                                <View style={{
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: 10,
+                                }}>
+                                    <Pressable style={{
+                                        flexDirection: 'row'
+                                    }} onPress={() => {
+                                        setDuration(true);
+                                    }}>
+                                        <View style={{
+                                            height: 15,
+                                            width: 15,
+                                            borderWidth: 1,
+                                            borderRadius: 20,
+                                            marginTop: 3,
+                                            backgroundColor: duration ? 'black' : 'white'
+                                        }} />
+                                        <Text
+                                            style={{
+                                                paddingLeft: 10,
+                                            }}>Duration</Text>
+                                    </Pressable>
+                                </View>
+                            </View>
+                            <View style={{
+                                width: '40%'
+                            }}>
+                                {duration ?
+                                    <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '70%' }}>
+                                            <Inputform2 heading="Duration" value={durationPeriod} onChange={handleDurationPeriod} />
+                                        </View>
+                                        <View style={{ width: '30%' }}>
+                                            <Text style={{ paddingTop: 20, fontWeight: 'bold', color: 'black' }}>hrs</Text>
+                                        </View>
+                                    </View>
+                                    : <View style={{ width: '100%', flexDirection: 'row' }}>
+                                        <View style={{ width: '50%' }}>
+                                            <Inputform2 heading="start" value={start.toString()} onChange={handleStart} />
+                                        </View>
+                                        <View style={{ width: '50%' }}>
+                                            <Inputform2 heading="end" value={end.toString()} onChange={handleEnd} />
+                                        </View>
+                                    </View>}
+                            </View>
+                        </View>
+                    </View>
+                    }
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '60%', paddingTop: 30 }}>
+                        <Pressable
                             style={{
+                                paddingTop: 30,
+                            }}
+                            onPress={handleSubmit}>
+                            <Text style={{
                                 height: 30,
                                 width: 80,
                                 borderWidth: 1,
-                                borderColor: 'green',
+                                borderColor: 'black',
                                 textAlign: 'center',
                                 paddingTop: 3,
                                 borderRadius: 5,
                                 elevation: 5,
-                                backgroundColor: 'green',
+                                backgroundColor: 'black',
                                 color: 'white',
-                            }}>Search</Text>
-                    </Pressable>
-                    {/* <Pressable style={{paddingTop:30, }}>
+                                fontWeight: '400'
+                            }}>Save</Text>
+                        </Pressable>
+                        <Pressable style={{ paddingTop: 30, }}>
+                            <Text onPress={() => navigation.navigate('Search', { email: email })}
+                                style={{
+                                    height: 30,
+                                    width: 80,
+                                    borderWidth: 1,
+                                    borderColor: 'green',
+                                    textAlign: 'center',
+                                    paddingTop: 3,
+                                    borderRadius: 5,
+                                    elevation: 5,
+                                    backgroundColor: 'green',
+                                    color: 'white',
+                                }}>Search</Text>
+                        </Pressable>
+                        {/* <Pressable style={{paddingTop:30, }}>
         <Text
                    style={{
                     height: 30,
@@ -1661,27 +1757,28 @@ export default function DailyEntry({ route, navigation }) {
                     color: 'white',
                    }}>Delete</Text>
         </Pressable> */}
-                </View>
-                {loading && (
-                    <View style={{ alignItems: 'center', marginTop: 20 }}>
-                        <ActivityIndicator size="large" color="#0000ff" />
-                        {/* <Text>Uploading...</Text> */}
-                    </View>)}
-                {deleting && (
-                    <View style={{ alignItems: 'center', marginTop: 20 }}>
-                        <ActivityIndicator size="large" color="#0000ff" />
-                        {/* <Text>deleting...</Text> */}
                     </View>
-                )}
-                {updating && (
-                    <View style={{ alignItems: 'center', marginTop: 20 }}>
-                        <ActivityIndicator size="large" color="#0000ff" />
-                        {/* <Text>deleting...</Text> */}
-                    </View>
-                )}
+                    {loading && (
+                        <View style={{ alignItems: 'center', marginTop: 20 }}>
+                            <ActivityIndicator size="large" color="#0000ff" />
+                            {/* <Text>Uploading...</Text> */}
+                        </View>)}
+                    {deleting && (
+                        <View style={{ alignItems: 'center', marginTop: 20 }}>
+                            <ActivityIndicator size="large" color="#0000ff" />
+                            {/* <Text>deleting...</Text> */}
+                        </View>
+                    )}
+                    {updating && (
+                        <View style={{ alignItems: 'center', marginTop: 20 }}>
+                            <ActivityIndicator size="large" color="#0000ff" />
+                            {/* <Text>deleting...</Text> */}
+                        </View>
+                    )}
 
-            </View>
-        </ScrollView>
+                </View>
+            </ScrollView>
+        </View>
     )
 }
 

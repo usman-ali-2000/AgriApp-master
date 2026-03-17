@@ -113,29 +113,45 @@ export default function Plot({ route }) {
             item.farm === farmId
         )
         );
-        if (farmId === '') {
+        if (plotId === '') {
             try {
-                const plotData = { farm: farmId, block, plot, area, season: seasonData, rowspace: rowSpace, variety: varietyInfo, email, date: formattedDate };
+                const plotData = {
+                    farm: farmId,
+                    block,
+                    plot,
+                    area,
+                    season: seasonData,
+                    rowspace: rowSpace,
+                    variety: varietyInfo,
+                    email,
+                    date: formattedDate
+                };
+
                 const response = await fetch(`${BaseUrl}/plot`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(plotData),
                 });
 
-                const text = await response.text();
-                console.log("Server response:", text);
-                // const data = await response.json();
-
-                if (!response) {
-                    Alert.alert(data.message || "Something went wrong");
-                } else {
-                    Alert.alert(`Plot added successfully!`);
+                // First check if response is OK
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log("Server Error:", errorText);
+                    Alert.alert("Server Error");
+                    return;
                 }
+
+                const data = await response.json();
+                console.log("Server response:", data);
+
+                Alert.alert("Plot added successfully!");
+
             } catch (error) {
-                console.error(error);
+                console.log("Fetch error:", error);
+                Alert.alert("Network error");
             }
         } else {
-            handleUpdate();
+            await handleUpdate();
         }
         await fetchPlot();
         handleOk();
@@ -412,9 +428,9 @@ export default function Plot({ route }) {
             )}
             <ScrollView style={{ width: '100%', flex: 1, backgroundColor: 'white' }} contentContainerStyle={{ justifyContent: 'center', alignItems: 'flex-start' }} showsVerticalScrollIndicator={false}>
                 <View style={{ flexDirection: 'column', justifyContent: 'center', width: '100%', alignItems: 'center', backgroundColor: 'white' }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, width:'80%' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, width: '80%' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '40%' }}>
-                            <View style={{ flexDirection: 'column', width: '120%', paddingRight: 5, paddingTop: 5, marginLeft:'15%' }}>
+                            <View style={{ flexDirection: 'column', width: '120%', paddingRight: 5, paddingTop: 5, marginLeft: '15%' }}>
                                 <Text style={{ fontWeight: 'bold', color: 'black' }}>Farm</Text>
                                 <Pressable onPress={() => handleFarm()}>
                                     <View style={{ flexDirection: 'row', backgroundColor: 'lightgrey', height: 40, borderRadius: 8 }}>
@@ -428,7 +444,7 @@ export default function Plot({ route }) {
                                 {openFarm ? <View style={{ height: 80 }}>{farm()}</View> : ''}
                             </View>
                         </View>
-                        <View style={{ alignSelf: 'flex-start', marginLeft: '2%', width:'45%' }}>
+                        <View style={{ alignSelf: 'flex-start', marginLeft: '2%', width: '45%' }}>
                             <DateItem
                                 label="Entry Date"
                                 value={[date1]}
